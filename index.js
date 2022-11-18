@@ -42,6 +42,7 @@ async function run() {
         const appointmentOptionCollection = client.db('doctorPortal').collection('appointmentOptions');
         const bookingsCollection = client.db('doctorPortal').collection('bookings');
         const usersCollection = client.db('doctorPortal').collection('users');
+        const doctorsCollection = client.db('doctorsPortal').collection('doctors');
 
         // Use Aggregate to query multiple collection and then merge data
         app.get('/appointmentOptions', async (req, res) => {
@@ -63,6 +64,13 @@ async function run() {
 
             res.send(options);
         });
+
+        // 
+        app.get('/appointmentSpecialty', async (req, res) => {
+            const query = {}
+            const result = await appointmentOptionCollection.find(query).project({ name: 1 }).toArray();
+            res.send(result);
+        })
 
         // mongodb operator pipeline....
         app.get('/v2/appointmentOptions', async (req, res) => {
@@ -159,6 +167,12 @@ async function run() {
             res.send(result);
         })
 
+        app.get('/users', async (req, res) => {
+            const query = {};
+            const users = await usersCollection.find(query).toArray();
+            res.send(users);
+        });
+
         app.get('/users/admin/:email', async (req, res) => {
             const email = req.params.email;
             const query = { email }
@@ -185,6 +199,26 @@ async function run() {
                 }
             }
             const result = await usersCollection.updateOne(filter, updatedDoc, options);
+            res.send(result);
+        });
+
+        // ............ doctorsCollection...............
+        app.get('/doctors', verifyJWT, verifyAdmin, async (req, res) => {
+            const query = {};
+            const doctors = await doctorsCollection.find(query).toArray();
+            res.send(doctors);
+        })
+
+        app.post('/doctors', verifyJWT, verifyAdmin, async (req, res) => {
+            const doctor = req.body;
+            const result = await doctorsCollection.insertOne(doctor);
+            res.send(result);
+        });
+
+        app.delete('/doctors/:id', verifyJWT, verifyAdmin, async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: ObjectId(id) };
+            const result = await doctorsCollection.deleteOne(filter);
             res.send(result);
         })
 

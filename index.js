@@ -1,7 +1,9 @@
 const express = require('express');
 const cors = require('cors');
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
+const jwt = require('jsonwebtoken')
 require('dotenv').config();
+
 const port = process.env.PORT || 5000;
 
 const app = express();
@@ -19,6 +21,7 @@ async function run() {
     try {
         const appointmentOptionCollection = client.db('doctorPortal').collection('appointmentOptions');
         const bookingsCollection = client.db('doctorPortal').collection('bookings');
+        const usersCollection = client.db('doctorPortal').collection('users');
 
         // Use Aggregate to query multiple collection and then merge data
         app.get('/appointmentOptions', async (req, res) => {
@@ -88,23 +91,51 @@ async function run() {
         });
 
 
+        // booking ta query korsi
+        app.get('/bookings', async (req, res) => {
+            const email = req.query.email;
+            const query = { email: email };
+            const bookings = await bookingsCollection.find(query).toArray();
+            res.send(bookings);
+        })
+
+        // user thka bookings nita si
         app.post('/bookings', async (req, res) => {
             const booking = req.body;
             console.log(booking);
             const query = {
                 appointmentDate: booking.appointmentDate,
                 email: booking.email,
-                treatment: booking.treatment 
+                treatment: booking.treatment
             }
 
             const alreadyBooked = await bookingsCollection.find(query).toArray();
 
-            if (alreadyBooked.length){
+            if (alreadyBooked.length) {
                 const message = `You already have a booking on ${booking.appointmentDate}`
-                return res.send({acknowledged: false, message})
+                return res.send({ acknowledged: false, message })
             }
 
             const result = await bookingsCollection.insertOne(booking);
+            res.send(result);
+        });
+
+        app.get('/jwt', async (req, res) => {
+            const email = req.query.email;
+            const query = { email: email };
+            const user = await usersCollection.findOne(query);
+            if (user) {
+                const token = jwt.sign({ email }, process.env.ACCESS_TOKEN, { expiresIn: '1d' })
+                return res.send({ accessToken: token });
+            }
+            res.status(403).send({ accessToken: '' })
+        });
+
+        // create
+        app.post('/users', async (req, res) => {
+            const user = req.body;
+            console.log('user',user);
+            const result = await usersCollection.insertOne(user);
             res.send(result);
         })
 

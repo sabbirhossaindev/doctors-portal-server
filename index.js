@@ -37,12 +37,26 @@ function verifyJWT(req, res, next) {
 }
 
 
+
+
 async function run() {
     try {
         const appointmentOptionCollection = client.db('doctorPortal').collection('appointmentOptions');
         const bookingsCollection = client.db('doctorPortal').collection('bookings');
         const usersCollection = client.db('doctorPortal').collection('users');
         const doctorsCollection = client.db('doctorsPortal').collection('doctors');
+
+        // NOTE: make sure you use verifyAdmin after verifyJWT
+        const verifyAdmin = async (req, res, next) =>{
+            const decodedEmail = req.decoded.email;
+            const query = { email: decodedEmail };
+            const user = await usersCollection.findOne(query);
+
+            if (user?.role !== 'admin') {
+                return res.status(403).send({ message: 'forbidden access' })
+            }
+            next();
+        }
 
         // Use Aggregate to query multiple collection and then merge data
         app.get('/appointmentOptions', async (req, res) => {
@@ -201,6 +215,13 @@ async function run() {
             const result = await usersCollection.updateOne(filter, updatedDoc, options);
             res.send(result);
         });
+
+        // app.delete('/users/:id', verifyJWT, async (req, res) => {
+        //     const id = req.params.id;
+        //     const filter = { _id: ObjectId(id) };
+        //     const result = await usersCollection.deleteOne(filter);
+        //     res.send(result);
+        // })
 
         // ............ doctorsCollection...............
         app.get('/doctors', verifyJWT, verifyAdmin, async (req, res) => {

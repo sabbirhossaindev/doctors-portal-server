@@ -4,6 +4,7 @@ const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const jwt = require('jsonwebtoken')
 require('dotenv').config();
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+// console.log(stripe);
 
 const port = process.env.PORT || 5000;
 
@@ -45,8 +46,8 @@ async function run() {
         const appointmentOptionCollection = client.db('doctorPortal').collection('appointmentOptions');
         const bookingsCollection = client.db('doctorPortal').collection('bookings');
         const usersCollection = client.db('doctorPortal').collection('users');
-        const doctorsCollection = client.db('doctorsPortal').collection('doctors');
-        const paymentsCollection = client.db('doctorsPortal').collection('payments');
+        const doctorsCollection = client.db('doctorPortal').collection('doctors');
+        const paymentsCollection = client.db('doctorPortal').collection('payments');
 
 
         // NOTE: make sure you use verifyAdmin after verifyJWT
@@ -272,6 +273,7 @@ async function run() {
 
         app.post('/create-payment-intent', async (req, res) => {
             const booking = req.body;
+            console.log(booking);
             const price = booking.price;
             const amount = price * 100;
 
@@ -282,6 +284,7 @@ async function run() {
                     "card"
                 ]
             });
+            console.log('paymentIntent.client_secret',paymentIntent.client_secret);
             res.send({
                 clientSecret: paymentIntent.client_secret,
             });

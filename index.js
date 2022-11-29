@@ -2,7 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const jwt = require('jsonwebtoken')
-const nodemailer = require("nodemailer");
+// const nodemailer = require("nodemailer");
 require('dotenv').config();
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 // console.log(stripe);
@@ -20,39 +20,39 @@ const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@clu
 // console.log(uri);
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 
-function sandBookingEmail(booking) {
-    const { appointmentDate, email, treatment,  slot } = booking;
-    let transporter = nodemailer.createTransport({
-        host: 'smtp.sendgrid.net',
-        port: 587,
-        auth: {
-            user: "apikey",
-            pass: process.env.SENDGRID_API_KEY
-        }
-    });
+// function sandBookingEmail(booking) {
+//     const { appointmentDate, email, treatment,  slot } = booking;
+//     let transporter = nodemailer.createTransport({
+//         host: 'smtp.sendgrid.net',
+//         port: 587,
+//         auth: {
+//             user: "apikey",
+//             pass: process.env.SENDGRID_API_KEY
+//         }
+//     });
 
-    transporter.sendMail({
-        from: "mdsabbir477470@gmail.com", // verified sender email
-        to: email, // recipient email
-        subject: `Your appointment for ${treatment} is confirmed`, // Subject line
-        text: "Hello world!", // plain text body
-        html: `
-        <h3>Your appointment is confirmed</h3>
-        <div>
-            <p>Your appointment for treatment: ${treatment}</p>
-            <p>Please visit us on ${appointmentDate} at ${slot}</p>
-            <p>Thanks from Doctor Portal</p>
+//     transporter.sendMail({
+//         from: "mdsabbir477470@gmail.com", // verified sender email
+//         to: email, // recipient email
+//         subject: `Your appointment for ${treatment} is confirmed`, // Subject line
+//         text: "Hello world!", // plain text body
+//         html: `
+//         <h3>Your appointment is confirmed</h3>
+//         <div>
+//             <p>Your appointment for treatment: ${treatment}</p>
+//             <p>Please visit us on ${appointmentDate} at ${slot}</p>
+//             <p>Thanks from Doctor Portal</p>
 
-        </div>
-        `, // html body
-      }, function(error, info){
-        if (error) {
-          console.log(error);
-        } else {
-          console.log('Email sent: ' + info.response);
-        }
-      });
-}
+//         </div>
+//         `, // html body
+//       }, function(error, info){
+//         if (error) {
+//           console.log(error);
+//         } else {
+//           console.log('Email sent: ' + info.response);
+//         }
+//       });
+// }
 
 function verifyJWT(req, res, next) {
     const authHeader = req.headers.authorization;
@@ -200,7 +200,7 @@ async function run() {
 
             const result = await bookingsCollection.insertOne(booking);
             // sand email about appointment confirmation
-            sandBookingEmail(booking);
+            // sandBookingEmail(booking);
             res.send(result);
         });
 

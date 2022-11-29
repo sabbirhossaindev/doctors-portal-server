@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const jwt = require('jsonwebtoken')
+const nodemailer = require("nodemailer");
 require('dotenv').config();
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 // console.log(stripe);
@@ -19,8 +20,32 @@ const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@clu
 // console.log(uri);
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 
-function verifyJWT(req, res, next) {
+function sandBookingEmail(booking) {
+    let transporter = nodemailer.createTransport({
+        host: 'smtp.sendgrid.net',
+        port: 587,
+        auth: {
+            user: "apikey",
+            pass: process.env.SENDGRID_API_KEY
+        }
+    });
 
+    transporter.sendMail({
+        from: "SENDER_EMAIL", // verified sender email
+        to: "RECIPIENT_EMAIL", // recipient email
+        subject: "Test message subject", // Subject line
+        text: "Hello world!", // plain text body
+        html: "<b>Hello world!</b>", // html body
+      }, function(error, info){
+        if (error) {
+          console.log(error);
+        } else {
+          console.log('Email sent: ' + info.response);
+        }
+      });
+}
+
+function verifyJWT(req, res, next) {
     const authHeader = req.headers.authorization;
     if (!authHeader) {
         return res.status(401).send('unauthorized access');
@@ -165,6 +190,8 @@ async function run() {
             }
 
             const result = await bookingsCollection.insertOne(booking);
+            // sand email about appointment confirmation
+            sandBookingEmail(booking);
             res.send(result);
         });
 

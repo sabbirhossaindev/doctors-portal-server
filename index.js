@@ -21,6 +21,7 @@ const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@clu
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 
 function sandBookingEmail(booking) {
+    const { appointmentDate, email, treatment,  slot } = booking;
     let transporter = nodemailer.createTransport({
         host: 'smtp.sendgrid.net',
         port: 587,
@@ -31,11 +32,19 @@ function sandBookingEmail(booking) {
     });
 
     transporter.sendMail({
-        from: "SENDER_EMAIL", // verified sender email
-        to: "RECIPIENT_EMAIL", // recipient email
-        subject: "Test message subject", // Subject line
+        from: "mdsabbir477470@gmail.com", // verified sender email
+        to: email, // recipient email
+        subject: `Your appointment for ${treatment} is confirmed`, // Subject line
         text: "Hello world!", // plain text body
-        html: "<b>Hello world!</b>", // html body
+        html: `
+        <h3>Your appointment is confirmed</h3>
+        <div>
+            <p>Your appointment for treatment: ${treatment}</p>
+            <p>Please visit us on ${appointmentDate} at ${slot}</p>
+            <p>Thanks from Doctor Portal</p>
+
+        </div>
+        `, // html body
       }, function(error, info){
         if (error) {
           console.log(error);

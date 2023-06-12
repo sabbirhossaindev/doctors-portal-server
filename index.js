@@ -82,7 +82,8 @@ async function run() {
         const usersCollection = client.db('doctorPortal').collection('users');
         const doctorsCollection = client.db('doctorPortal').collection('doctors');
         const paymentsCollection = client.db('doctorPortal').collection('payments');
-        const submitCollection = client.db('doctorPortal').collection('submit');
+        // const submitCollection = client.db('doctorPortal').collection('submit');
+        
 
 
         // NOTE: make sure you use verifyAdmin after verifyJWT
@@ -342,15 +343,15 @@ async function run() {
             res.send(result);
         })
 
-        // doctor Portalo website all submit collection..
-        app.post('/submit', async (req, res) => {
-            const body = req.body;
-            const doc = body;
-            console.log(doc);
-            const result = await submitCollection.insertOne(doc)
-            console.log(result);
-            res.send(result)
-        });
+        // // doctor Portalo website all submit collection..
+        // app.post('/submit', async (req, res) => {
+        //     const body = req.body;
+        //     const doc = body;
+        //     console.log(doc);
+        //     const result = await submitCollection.insertOne(doc)
+        //     console.log(result);
+        //     res.send(result)
+        // });
 
         /***
 
